@@ -13,8 +13,8 @@ class FrameHandler():
         self.allowRead = True
 
     def transfer(self,frameData):
-		#把40bit的数据转成按字节倒序（即高位字节在最后，低位字节在最前）的64比特的帧数据
-        return frameData[32:40]+frameData[24:32]+frameData[16:24]+frameData[8:16]+frameData[0:8]+'000'+frameData[21:26]+'0000000000000000'+'\n'
+		#把40bit的数据转成64比特的帧数据
+        return frameData[8:40]+'000000000000000000000000'+frameData[0:8]+'\n'
 
     def transformFrameFile(self,fileName):
         r'''
