@@ -18,7 +18,7 @@ class FrameHandler():
 
     def transformFrameFile(self,fileName):
         r'''
-        先把40bit的TXT帧文件转成60bit字节倒序的TXT帧文件，再转成bytes类型的.npy文件，用于传输；
+        先把40bit的TXT帧文件转成60bit的TXT帧文件，再转成bytes类型的.npy文件，用于传输；
         '''
         #读入40比特的帧数据
         mylog.info('正在将40bit帧文件转换为60bit的倒序帧文件...')
@@ -78,15 +78,9 @@ class FrameHandler():
         把处理好的帧数据逐帧写入USB设备，每帧间隔gap，单位为ms；
         '''
         #先定义启动帧和结束帧
-        startFrame1 = self.transfer('1010000000000000000000000000000000000000')
-        startFrame2 = self.transfer('1001000000000000000000000000000000000000')
-        endFrame = self.transfer('1011000000000000000000000000000000000000')
-        specialFrames = numpy.zeros(3).astype('uint64')
-        specialFrames[0] = int(startFrame1,2)
-        specialFrames[1] = int(startFrame2,2)
-        specialFrames[2] = int(endFrame,2)
-        specialFrames.dtype = 'uint8'
-        specialBytes = bytes(specialFrames)
+        startFrame1 = 10    #1010
+        startFrame2 = 9     #1001
+        endFrame = 11       #1011
         try:
             mylog.info('正在写入帧文件...')
             frameData = numpy.load('./files/%s.npy' % fileName)
@@ -98,8 +92,8 @@ class FrameHandler():
                 time.sleep(gap/1000)
                 j = i
                 while j < dataLength:
-                    if frameData[j:(j+8)] == specialBytes[0:8] or frameData[j:(j+8)] == specialBytes[8:16] or\
-                        frameData[j:(j+8)] == specialBytes[16:24]:
+                    frameTitle = frameData[j+7] >> 4
+                    if frameTitle == startFrame1 or frameTitle == startFrame2 or frameTitle == endFrame:
                         break
                     j += 8
                 if not self.usbHandler.writeToUSB(frameData[i:j+8]):
