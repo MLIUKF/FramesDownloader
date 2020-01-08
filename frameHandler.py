@@ -53,7 +53,7 @@ class FrameHandler():
             #某些情况下需要降低发送速度，下面将帧数据分块发送；
             frameData = bytes(frameData)
             dataLength = len(frameData)
-            bytesValidOneTime = 4*1024  #每次发送的数据中，有效帧的字节数
+            bytesValidOneTime = int(0.5*1024)  #每次发送的数据中，有效帧的字节数
             i = 0
             while (i+bytesValidOneTime) < dataLength:
                 #time.sleep(0.001)
@@ -81,6 +81,7 @@ class FrameHandler():
         startFrame1 = 10    #1010
         startFrame2 = 9     #1001
         endFrame = 11       #1011
+        testFrame = 5       #0101
         try:
             mylog.info('正在写入帧文件...')
             frameData = numpy.load('./files/%s.npy' % fileName)
@@ -93,7 +94,7 @@ class FrameHandler():
                 j = i
                 while j < dataLength:
                     frameTitle = frameData[j+7] >> 4
-                    if frameTitle == startFrame1 or frameTitle == startFrame2 or frameTitle == endFrame:
+                    if frameTitle == startFrame1 or frameTitle == startFrame2 or frameTitle == endFrame or frameTitle == testFrame:
                         break
                     j += 8
                 if not self.usbHandler.writeToUSB(frameData[i:j+8]):
