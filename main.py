@@ -4,6 +4,7 @@ import logging
 import frameHandler
 import mylog
 import threading
+import time
 
 #设置log文件的格式
 logging.basicConfig(level=logging.DEBUG,
@@ -31,7 +32,10 @@ while True:
         frameHandler.findUSB()
         continue
     elif inputData == 'read':
-        readingThread.start()
+        frameHandler.stopReading()
+        time.sleep(0.005)
+        if not readingThread.is_alive():
+            readingThread.start()
         continue
     else:
         fileName, transform, frameGap = inputData.split(',')
