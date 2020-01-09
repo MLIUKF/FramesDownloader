@@ -34,8 +34,8 @@ while True:
     elif inputData == 'read':
         frameHandler.stopReading()
         time.sleep(0.005)
-        if not readingThread.is_alive():
-            readingThread.start()
+        readingThread = threading.Thread(target=frameHandler.readFromUSB, name='ReadingThread')
+        readingThread.start()
         continue
     else:
         fileName, transform, frameGap = inputData.split(',')
