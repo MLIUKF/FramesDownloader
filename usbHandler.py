@@ -83,13 +83,13 @@ class USBHandler():
         """
         if self.usbReady:
             try:
-                readOutData = array.array('B')
-                readOutBytesNum = self.deviceR.read(self.inPoint.bEndpointAddress,readOutData)
-                return readOutData, readOutBytesNum
+                #readOutData = array.array('B')
+                readOutBytes = self.deviceR.read(self.inPoint.bEndpointAddress,32,timeout=10)
+                return readOutBytes
             except BaseException as e:
                 mylog.error("Error: Failed to read from USB.")
                 mylog.error(str(e))
-                return None
+                return bytes()
         else:
             mylog.error("Error: USB device is not ready.")
             return None

@@ -114,13 +114,13 @@ class FrameHandler():
 
     def readFromUSB(self):
         while self.allowRead:
-            readOutData, readOutBytesNum = self.usbHandler.readFromUSB()
-            if readOutBytesNum == 0:
-                time.sleep(1)
+            readOutBytes = self.usbHandler.readFromUSB()
+            if len(readOutBytes) == 0:
+                time.sleep(5)
             else:
                 with open('./files/out.txt','a') as outFile:
                     bytesNum = 0
-                    for num in readOutData:
+                    for num in readOutBytes:
                         outFile.write('{:0>8b}'.format(num))
                         bytesNum += 1
                         if bytesNum == 5:
