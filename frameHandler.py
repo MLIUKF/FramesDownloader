@@ -81,7 +81,7 @@ class FrameHandler():
         startFrame1 = 10    #1010
         startFrame2 = 9     #1001
         endFrame = 11       #1011
-        testFrame = 5       #0101
+        testFrame = 4       #0100
         try:
             mylog.info('正在写入帧文件...')
             frameData = numpy.load('./files/%s.npy' % fileName)
