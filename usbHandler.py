@@ -2,6 +2,7 @@ import usb
 import logging
 import mylog
 import array
+import numpy
 
 r'''
 USBHandler用于处理与USB接口有关的任务
@@ -79,6 +80,11 @@ class USBHandler():
         """
         if self.usbReady:
             try:
+                #如果写入的数据不足32B，需要补足32B，用'00110000'补足
+                if len(data) < 32:
+                    bytesAppendNum = 32 - len(data)
+                    bytesAppend = 48*(numpy.ones(bytesAppendNum).astype('uint8'))   #48=00110000
+                    data = data + bytes(bytesAppend)
                 self.deviceW.write(self.outPoint.bEndpointAddress,data)
             except BaseException as e:
                 mylog.error("Error: Failed to write to USB.")
