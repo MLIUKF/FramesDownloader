@@ -121,13 +121,13 @@ class FrameHandler():
                 time.sleep(5)
             else:
                 with open('./files/out.txt','a') as outFile:
-                    bytesNum = 0
-                    for num in readOutBytes:
-                        outFile.write('{:0>8b}'.format(num))
-                        bytesNum += 1
-                        if bytesNum == 5:
+                    readOutBytesNum = len(readOutBytes)
+                    for i in range(0,readOutBytesNum,8):
+                        frameTitle = readOutBytes[i+3] >> 4
+                        if frameTitle != 3:     #0011
+                            for j in range(8):
+                                outFile.write('{:0>8b}'.format(readOutBytes[i+j]))
                             outFile.write('\n')
-                            bytesNum = 0
 
     def stopReading(self):
         self.allowRead = False
