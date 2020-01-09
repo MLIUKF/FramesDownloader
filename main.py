@@ -30,6 +30,9 @@ while True:
     elif inputData == 'usb':    #重新查找、连接USB设备
         frameHandler.findUSB()
         continue
+    elif inputData == 'read':
+        readingThread.start()
+        continue
     else:
         fileName, transform, frameGap = inputData.split(',')
 

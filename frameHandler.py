@@ -115,7 +115,9 @@ class FrameHandler():
     def readFromUSB(self):
         while self.allowRead:
             readOutBytes = self.usbHandler.readFromUSB()
-            if len(readOutBytes) == 0:
+            if readOutBytes == 1:
+                return False
+            elif readOutBytes == None:
                 time.sleep(5)
             else:
                 with open('./files/out.txt','a') as outFile:

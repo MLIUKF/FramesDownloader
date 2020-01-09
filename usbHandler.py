@@ -27,7 +27,22 @@ class USBHandler():
         self.deviceOrder[1], self.deviceOrder[0] = self.deviceOrder
 
         usbDeviceNum = len(self.device)
-        if usbDeviceNum == 2:
+        if usbDeviceNum == 1:
+            self.deviceR = self.device[0]
+    
+            self.deviceR.set_configuration()
+            cfgR = self.deviceR.get_active_configuration()
+            intfR = cfgR[(0,0)]
+        
+            self.inPoint = usb.util.find_descriptor(intfR,
+                # match the first IN endpoint
+                custom_match = lambda e: \
+                    usb.util.endpoint_direction(e.bEndpointAddress) == \
+                    usb.util.ENDPOINT_IN)
+
+            self.usbReady = True
+            mylog.info("1个USB设备已连接。")
+        elif usbDeviceNum == 2:
             self.deviceW = self.device[self.deviceOrder[0]]
             self.deviceR = self.device[self.deviceOrder[1]]
 
@@ -52,7 +67,7 @@ class USBHandler():
                     usb.util.ENDPOINT_IN)
 
             self.usbReady = True
-            mylog.info("USB设备已连接。")
+            mylog.info("2个USB设备已连接。")
         else:
             self.usbReady = False
             mylog.error("Error: 可用USB设备数量不是2。")
@@ -84,12 +99,12 @@ class USBHandler():
         if self.usbReady:
             try:
                 #readOutData = array.array('B')
-                readOutBytes = self.deviceR.read(self.inPoint.bEndpointAddress,32,timeout=10)
+                readOutBytes = self.deviceR.read(self.inPoint.bEndpointAddress,self.inPoint.wMaxPacketSize)
                 return readOutBytes
             except BaseException as e:
                 mylog.error("Error: Failed to read from USB.")
                 mylog.error(str(e))
-                return bytes()
+                return 1
         else:
             mylog.error("Error: USB device is not ready.")
             return None
