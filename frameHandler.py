@@ -116,18 +116,26 @@ class FrameHandler():
         while self.allowRead:
             readOutBytes = self.usbHandler.readFromUSB()
             if readOutBytes == 1:
+                mylog.error('读出过程发生错误。')
                 return False
             elif readOutBytes == None:
+                mylog.error('未读到数据。')
                 time.sleep(5)
             else:
                 with open('./files/out.txt','a') as outFile:
                     readOutBytesNum = len(readOutBytes)
                     for i in range(0,readOutBytesNum,8):
-                        frameTitle = readOutBytes[i+3] >> 4
-                        if frameTitle != 3:     #0011
-                            for j in range(8):
-                                outFile.write('{:0>8b}'.format(readOutBytes[i+j]))
-                            outFile.write('\n')
+                        #frameTitle = readOutBytes[i+3] >> 4
+                        #if frameTitle != 3:     #0011
+                        for j in range(3,-1,-1):
+                            outFile.write('{:0>2x}'.format(readOutBytes[i+j]))
+                        for j in range(7,3,-1):
+                            outFile.write('{:0>2x}'.format(readOutBytes[i+j]))
+                        outFile.write('\n')
+            break
 
     def stopReading(self):
         self.allowRead = False
+
+    def startReading(self):
+        self.allowRead = True
