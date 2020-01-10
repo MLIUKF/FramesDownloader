@@ -17,7 +17,7 @@ frameHandler = frameHandler.FrameHandler()      #处理帧文件的类
 
 #先启动从USB设备读数据的线程，保证在程序结束前不停的读出。
 readingThread = threading.Thread(target=frameHandler.readFromUSB, name='ReadingThread')
-readingThread.start()
+#readingThread.start()
 
 #下面执行写入过程
 inputData = None
@@ -34,8 +34,10 @@ while True:
     elif inputData == 'read':
         frameHandler.stopReading()
         time.sleep(0.005)
+        frameHandler.startReading()
         readingThread = threading.Thread(target=frameHandler.readFromUSB, name='ReadingThread')
         readingThread.start()
+        print('读出线程已重启。')
         continue
     else:
         fileName, transform, frameGap = inputData.split(',')
