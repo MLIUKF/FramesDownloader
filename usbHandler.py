@@ -24,6 +24,12 @@ class USBHandler():
         self.findUSB()
 
     def findUSB(self):
+        self.device = []
+        self.deviceW = None
+        self.deviceR = None
+        self.inPoint = None
+        self.outPoint = None
+        self.usbReady = False
         self.device = list(usb.core.find(find_all=True))
         self.deviceOrder[1], self.deviceOrder[0] = self.deviceOrder
 
