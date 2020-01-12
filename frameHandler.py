@@ -75,7 +75,7 @@ class FrameHandler():
 
     def writeToUSBWithGap(self,fileName,gap):
         r'''
-        把处理好的帧数据逐帧写入USB设备，每帧间隔gap，单位为ms；
+        把处理好的帧数据逐帧写入USB设备，每帧间隔gap，单位为us；
         '''
         #先定义启动帧和结束帧
         startFrame1 = 10    #1010
@@ -90,10 +90,10 @@ class FrameHandler():
             dataLength = len(frameData)
             i = 0
             while i < dataLength:
-                time.sleep(gap/1000)
+                time.sleep(gap/1000000)
                 j = i
                 while j < dataLength:
-                    frameTitle = frameData[j+7] >> 4
+                    frameTitle = frameData[j] >> 4
                     if frameTitle == startFrame1 or frameTitle == startFrame2 or frameTitle == endFrame or frameTitle == testFrame:
                         break
                     j += 8
@@ -124,15 +124,15 @@ class FrameHandler():
             else:
                 with open('./files/out.txt','a') as outFile:
                     readOutBytesNum = len(readOutBytes)
-                    for i in range(0,readOutBytesNum,8):
+                    for i in range(0,readOutBytesNum,4):
                         #frameTitle = readOutBytes[i+3] >> 4
                         #if frameTitle != 3:     #0011
                         for j in range(3,-1,-1):
-                            outFile.write('{:0>2x}'.format(readOutBytes[i+j]))
-                        for j in range(7,3,-1):
-                            outFile.write('{:0>2x}'.format(readOutBytes[i+j]))
+                            outFile.write('{:0>8b}'.format(readOutBytes[i+j]))
+                        #for j in range(7,3,-1):
+                            #outFile.write('{:0>8b}'.format(readOutBytes[i+j]))
                         outFile.write('\n')
-            break
+            #break
 
     def stopReading(self):
         self.allowRead = False
