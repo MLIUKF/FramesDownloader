@@ -111,7 +111,7 @@ class USBHandler():
         if self.usbReady:
             try:
                 #readOutData = array.array('B')
-                readOutBytes = self.deviceR.read(self.inPoint.bEndpointAddress,self.inPoint.wMaxPacketSize)
+                readOutBytes = self.deviceR.read(self.inPoint.bEndpointAddress,self.inPoint.wMaxPacketSize,timeout=1000000)
                 return readOutBytes
             except BaseException as e:
                 mylog.error("Error: Failed to read from USB.")
