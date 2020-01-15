@@ -6,4 +6,4 @@ def info(text):
 
 def error(text):
     logging.error(text)
-    print(text)
+    #print(text)

@@ -79,8 +79,11 @@ class FrameHandler():
         '''
         #先定义启动帧和结束帧
         startFrame1 = 10    #1010
-        startFrame2 = 9     #1001
-        endFrame = 11       #1011
+        indiFrame1 = 9      #1001
+        endFrame1 = 11      #1011
+        startFrame2 = 14    #1110
+        indiFrame2 = 13     #1101
+        endFrame2 = 15      #1111
         testFrame = 4       #0100
         try:
             mylog.info('正在写入帧文件...')
@@ -94,7 +97,7 @@ class FrameHandler():
                 j = i
                 while j < dataLength:
                     frameTitle = frameData[j] >> 4
-                    if frameTitle == startFrame1 or frameTitle == startFrame2 or frameTitle == endFrame or frameTitle == testFrame:
+                    if frameTitle == startFrame1 or frameTitle == indiFrame1 or frameTitle == endFrame1 or frameTitle == startFrame2 or frameTitle == indiFrame2 or frameTitle == endFrame2 or frameTitle == testFrame:
                         break
                     j += 8
                 if not self.usbHandler.writeToUSB(frameData[i:j+8]):

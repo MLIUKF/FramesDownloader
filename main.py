@@ -17,7 +17,7 @@ frameHandler = frameHandler.FrameHandler()      #处理帧文件的类
 
 #先启动从USB设备读数据的线程，保证在程序结束前不停的读出。
 readingThread = threading.Thread(target=frameHandler.readFromUSB, name='ReadingThread')
-#readingThread.start()
+readingThread.start()
 
 #下面执行写入过程
 inputData = None
