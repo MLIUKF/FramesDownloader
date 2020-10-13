@@ -1,2 +1,4 @@
+*.json
+*.npy
 *.txt
-log.log
+*.log
