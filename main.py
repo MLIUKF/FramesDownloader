@@ -17,10 +17,12 @@ frameHandler = frameHandler.FrameHandler()      #处理帧文件的类
 
 #先启动从USB设备读数据的线程，保证在程序结束前不停的读出。
 readingThread = threading.Thread(target=frameHandler.readFromUSB, name='ReadingThread')
-readingThread.start()
+#readingThread.start()
 
 #下面执行写入过程
 inputData = None
+fileName = 'None'
+transform = None
 while True:
     #输入帧文件的信息，输入格式为'文件名(不含后缀),是否为新文件,帧间隔'
     inputData = input()
@@ -39,19 +41,28 @@ while True:
         readingThread.start()
         print('读出线程已重启。')
         continue
+    elif inputData == 'file':
+        print('当前帧文件：%s，请输入新的帧文件名称：' % fileName)
+        inputDataB = input()
+        fileName, transform = inputDataB.split(',')
+        #检查帧文件是否存在，如果不存在，跳出循环一次
+        if not os.path.exists('./files/%s.txt' % fileName):
+            mylog.error('Error: \'%s.txt\' does not exit.' % (fileName))
+            continue
+        if transform == '1':
+            frameHandler.transformFrameFile(fileName)
+    elif inputData == 'autowrite':
+        print('开始自动写入帧文件%s...' % fileName)
+        if frameHandler.writeToUSB(fileName):
+            print('自动写入结束。')
+        else:
+            print('自动写入失败。')
+    elif inputData == 'handwrite':
+        print('开始手动写入帧文件%s...' % fileName)
+        if frameHandler.writeToUSBWithFrameNum(fileName):
+            print('已退出手动写入。')
+        else:
+            print('手动写入失败。')
     else:
-        fileName, transform, frameGap = inputData.split(',')
-
-    #检查帧文件是否存在，如果不存在，跳出循环一次
-    if not os.path.exists('./files/%s.txt' % fileName):
-        mylog.error('Error: \'%s.txt\' does not exit.' % (fileName))
+        print('指令未识别，请重新输入：')
         continue
-
-    if transform == '1':
-        frameHandler.transformFrameFile(fileName)
-
-    frameGap = int(frameGap)
-    if frameGap <= 0:
-        frameHandler.writeToUSB(fileName)
-    else:
-        frameHandler.writeToUSBWithGap(fileName,frameGap)

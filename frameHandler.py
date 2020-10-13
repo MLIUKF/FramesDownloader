@@ -13,23 +13,23 @@ class FrameHandler():
         self.allowRead = True
 
     def transfer(self,frameData):
-		#把40bit的数据转成64比特的帧数据
-        return frameData[8:40]+'000000000000000000000000'+frameData[0:8]+'\n'
+		#把64bit的数据转成64比特的倒序帧数据
+        return frameData[32:64]+frameData[0:32]+'\n'
 
     def transformFrameFile(self,fileName):
         r'''
-        先把40bit的TXT帧文件转成60bit的TXT帧文件，再转成bytes类型的.npy文件，用于传输；
+        把64bit的TXT帧文件转成bytes类型的.npy文件，用于传输；
         '''
         #读入40比特的帧数据
-        mylog.info('正在将40bit帧文件转换为60bit的倒序帧文件...')
-        with open('./files/%s.txt' % fileName,'r') as net40b:
-            frames = net40b.readlines()
+        mylog.info('正在将64bit帧文件转换为64bit的倒序帧文件...')
+        with open('./files/%s.txt' % fileName,'r') as net64bInit:
+            frames = net64bInit.readlines()
             framesTrans = [self.transfer(f) for f in frames]
 
-        #写入64比特的帧数据,fileName64b_reverse.txt 
+        #写入64比特的帧数据,fileName64b_reverse.txt
         with open('./files/%s64b_reverse.txt' % fileName,'w') as net64b:
             temp=[net64b.write(f) for f in framesTrans]
-            mylog.info('正在将60bit的帧文件转换为.npy文件...')
+            mylog.info('正在将64bit的帧文件转换为.npy文件...')
 
         #读入按字节倒序的64比特的帧数据，并转成bytes类型数据，存入.npy文件中
         frames = framesTrans
@@ -73,44 +73,37 @@ class FrameHandler():
             mylog.info('已成功写入帧文件。')
             return True
 
-    def writeToUSBWithGap(self,fileName,gap):
+    def writeToUSBWithFrameNum(self,fileName):
         r'''
-        把处理好的帧数据逐帧写入USB设备，每帧间隔gap，单位为us；
+        把固定数量的帧数据写入USB设备，起始帧编号为currentFrameNo，写入帧的数量为frameNum；
         '''
-        #先定义启动帧和结束帧
-        startFrame1 = 10    #1010
-        indiFrame1 = 9      #1001
-        endFrame1 = 11      #1011
-        startFrame2 = 14    #1110
-        indiFrame2 = 13     #1101
-        endFrame2 = 15      #1111
-        testFrame = 4       #0100
+        currentFrameNo = 0
         try:
-            mylog.info('正在写入帧文件...')
             frameData = numpy.load('./files/%s.npy' % fileName)
-            #某些情况下需要降低发送速度，下面将帧数据分块发送；
             frameData = bytes(frameData)
             dataLength = len(frameData)
-            i = 0
-            while i < dataLength:
-                time.sleep(gap/1000000)
-                j = i
-                while j < dataLength:
-                    frameTitle = frameData[j] >> 4
-                    if frameTitle == startFrame1 or frameTitle == indiFrame1 or frameTitle == endFrame1 or frameTitle == startFrame2 or frameTitle == indiFrame2 or frameTitle == endFrame2 or frameTitle == testFrame:
-                        break
-                    j += 8
-                if not self.usbHandler.writeToUSB(frameData[i:j+8]):
-                    mylog.error('Error: 写入失败！')
-                    return False
-                i = j+8
+            frameLength = dataLength//8
         except BaseException as e:
-            mylog.error("Error: 写入帧文件失败。")
+            mylog.error("Error: 读取帧文件失败。")
             mylog.error(str(e))
             return False
         else:
-            mylog.info('已成功写入帧文件。')
-            return True
+            mylog.info('已成功读取帧文件。')
+        while True:
+            inputData = input()
+            if inputData == 'stop':
+                return True
+            else:
+                frameNum = int(inputData)
+                if currentFrameNo+frameNum > frameLength:
+                    mylog.error('Error: 超出帧文件范围。起始帧为%d，写入帧数量为%d...' % (currentFrameNo,frameNum))
+                    return False
+                mylog.info('正在写入帧，起始帧为%d，帧数量为%d...' % (currentFrameNo,frameNum))
+                if not self.usbHandler.writeToUSB(frameData[(8*currentFrameNo):(8*(currentFrameNo+frameNum))]):
+                    mylog.error('Error: 写入失败！')
+                    return False
+                currentFrameNo += frameNum
+        return True
 
     def findUSB(self):
         self.usbHandler.findUSB()
@@ -127,15 +120,15 @@ class FrameHandler():
             else:
                 with open('./files/out.txt','a') as outFile:
                     readOutBytesNum = len(readOutBytes)
-                    for i in range(0,readOutBytesNum,4):
+                    for i in range(0,readOutBytesNum,8):
                         #frameTitle = readOutBytes[i+3] >> 4
                         #if frameTitle != 3:     #0011
                         for j in range(3,-1,-1):
-                            outFile.write('{:0>8b}'.format(readOutBytes[i+j]))
-                        #for j in range(7,3,-1):
-                            #outFile.write('{:0>8b}'.format(readOutBytes[i+j]))
+                            outFile.write('{:0>2x}'.format(readOutBytes[i+j]))
+                        for j in range(7,3,-1):
+                            outFile.write('{:0>2x}'.format(readOutBytes[i+j]))
                         outFile.write('\n')
-            #break
+            break
 
     def stopReading(self):
         self.allowRead = False
