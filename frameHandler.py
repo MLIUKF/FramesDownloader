@@ -94,7 +94,12 @@ class FrameHandler():
             if inputData == 'stop':
                 return True
             else:
-                frameNum = int(inputData)
+                try:
+                    frameNum = int(inputData)
+                except BaseException as e:
+                    mylog.error("Error: 指令不符合要求，请输入数字或stop：")
+                    mylog.error(str(e))
+                    continue
                 if currentFrameNo+frameNum > frameLength:
                     mylog.error('Error: 超出帧文件范围。起始帧为%d，写入帧数量为%d...' % (currentFrameNo,frameNum))
                     return False
@@ -102,6 +107,7 @@ class FrameHandler():
                 if not self.usbHandler.writeToUSB(frameData[(8*currentFrameNo):(8*(currentFrameNo+frameNum))]):
                     mylog.error('Error: 写入失败！')
                     return False
+                print('已写入，请输入数字或stop：')
                 currentFrameNo += frameNum
         return True
 

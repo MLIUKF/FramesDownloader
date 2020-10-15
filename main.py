@@ -44,21 +44,26 @@ while True:
     elif inputData == 'file':
         print('当前帧文件：%s，请输入新的帧文件名称：' % fileName)
         inputDataB = input()
-        fileName, transform = inputDataB.split(',')
-        #检查帧文件是否存在，如果不存在，跳出循环一次
-        if not os.path.exists('./files/%s.txt' % fileName):
-            mylog.error('Error: \'%s.txt\' does not exit.' % (fileName))
+        try:
+            fileName, transform = inputDataB.split(',')
+            #检查帧文件是否存在，如果不存在，跳出循环一次
+            if not os.path.exists('./files/%s.txt' % fileName):
+                mylog.error('Error: \'%s.txt\' does not exit.' % (fileName))
+                continue
+            if transform == '1':
+                frameHandler.transformFrameFile(fileName)
+        except BaseException as e:
+            mylog.error("Error: 指令不符合要求。")
+            mylog.error(str(e))
             continue
-        if transform == '1':
-            frameHandler.transformFrameFile(fileName)
     elif inputData == 'autowrite':
-        print('开始自动写入帧文件%s...' % fileName)
+        print('开始自动写入帧文件：%s...' % fileName)
         if frameHandler.writeToUSB(fileName):
             print('自动写入结束。')
         else:
             print('自动写入失败。')
     elif inputData == 'handwrite':
-        print('开始手动写入帧文件%s...' % fileName)
+        print('开始手动写入帧文件：%s，请输入数字或stop：' % fileName)
         if frameHandler.writeToUSBWithFrameNum(fileName):
             print('已退出手动写入。')
         else:
